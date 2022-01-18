@@ -126,25 +126,22 @@ func (f *GeneratedFile) content() ([]byte, error) {
 		for line := 1; s.Scan(); line++ {
 			fmt.Fprintf(&src, "%5d\t%s\n", line, s.Bytes())
 		}
-		return nil, fmt.Errorf("%v: unparsable Go source: %v\n%v", f.filename, err, src.String())
+		return nil, fmt.Errorf("%s: unparsable Go source: %v\n%s", f.filename, err, src.String())
 	}
 
-	var imports = make([][2]string, 0, len(f.externalPackages))
-	var isStandard = make(map[string]bool, len(f.externalPackages))
+	var imports = make([]*ExternalPackage, 0, len(f.externalPackages))
 	for _, externalPackage := range f.externalPackages {
-		isStandard[externalPackage.Path] = IsStandard(externalPackage.Path)
-		imports = append(imports, [2]string{externalPackage.alias, externalPackage.Path})
+		imports = append(imports, externalPackage)
 	}
 
 	sort.Slice(imports, func(i, j int) bool {
-		var _i, _j = isStandard[imports[i][1]], isStandard[imports[j][1]]
-		if _i && !_j {
+		if imports[i].standard && !imports[j].standard {
 			return true
 		}
-		if _j && !_i {
+		if imports[j].standard && !imports[i].standard {
 			return false
 		}
-		return imports[i][1] < imports[j][1]
+		return imports[i].Path < imports[j].Path
 	})
 
 	// Modify the AST to include a new import block.
@@ -171,12 +168,12 @@ func (f *GeneratedFile) content() ([]byte, error) {
 		for _, item := range imports {
 			decl.Specs = append(decl.Specs, &ast.ImportSpec{
 				Name: &ast.Ident{
-					Name:    item[0],
+					Name:    item.alias,
 					NamePos: pos,
 				},
 				Path: &ast.BasicLit{
 					Kind:     token.STRING,
-					Value:    strconv.Quote(item[1]),
+					Value:    strconv.Quote(item.Path),
 					ValuePos: pos,
 				},
 				EndPos: pos,

@@ -8,8 +8,12 @@ import (
 // ExternalPackage is the import path of a Go package.
 // for example: "google.golang.org/protobuf/compiler/protogen"
 type ExternalPackage struct {
-	Path  string
+	// Path 包路径
+	Path string
+	// alias 别名
 	alias string
+	// standard 是否标准库包
+	standard bool
 }
 
 // ExternalIdent is a Go identifier, consisting of a name and import path.
@@ -20,7 +24,7 @@ type ExternalIdent struct {
 
 // NewExternalPackage .
 func NewExternalPackage(p string) *ExternalPackage {
-	return &ExternalPackage{Path: p, alias: trim(path.Base(p))}
+	return &ExternalPackage{Path: p, alias: trim(path.Base(p)), standard: IsStandard(p)}
 }
 
 // Alias .

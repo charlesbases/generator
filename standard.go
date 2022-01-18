@@ -19,12 +19,12 @@ func init() {
 }
 
 // IsStandard 是否为标准库包
-func IsStandard(dir string) bool {
-	if standardPackages[dir] {
+func IsStandard(p string) bool {
+	if standardPackages[p] {
 		return true
 	}
 	for inter := range standardPackages {
-		if strings.HasPrefix(dir, inter+"/") {
+		if strings.HasPrefix(p, inter+"/") {
 			return true
 		}
 	}
