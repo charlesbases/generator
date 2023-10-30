@@ -1,54 +1,27 @@
 package generator
 
-import (
-	"path"
-	"strings"
-)
+import "path/filepath"
 
-// ExternalPackage is the import path of a Go package.
+// externalPackage is the import path of a Go package.
 // for example: "google.golang.org/protobuf/compiler/protogen"
-type ExternalPackage struct {
-	// Path 包路径
-	Path string
+type externalPackage struct {
+	// path 包路径
+	path string
 	// alias 别名
 	alias string
 	// standard 是否标准库包
 	standard bool
 }
 
-// ExternalIdent is a Go identifier, consisting of a name and import path.
-type ExternalIdent struct {
-	Package *ExternalPackage
-	Name    string
-}
-
-// NewExternalPackage .
-func NewExternalPackage(p string) *ExternalPackage {
-	return &ExternalPackage{Path: p, alias: trim(path.Base(p)), standard: IsStandard(p)}
+// ExternalPackage .
+func ExternalPackage(pkg string) *externalPackage {
+	return &externalPackage{path: pkg, alias: trim(filepath.Base(pkg)), standard: IsStandard(pkg)}
 }
 
 // Alias .
-func (exp *ExternalPackage) Alias(a string) *ExternalPackage {
-	exp.alias = a
+func (exp *externalPackage) Alias(alias string) *externalPackage {
+	exp.alias = alias
 	return exp
-}
-
-// Ident .
-func (extp *ExternalPackage) Ident(name string) ExternalIdent {
-	return ExternalIdent{
-		Package: extp,
-		Name:    name,
-	}
-}
-
-// string return ExternalPackage.Alias + "." + ExternalIdent.Name
-func (exti *ExternalIdent) string() string {
-	var bui strings.Builder
-	bui.Grow(len(exti.Package.alias) + len(exti.Name) + 1)
-	bui.WriteString(exti.Package.alias)
-	bui.WriteString(".")
-	bui.WriteString(exti.Name)
-	return bui.String()
 }
 
 // trim .
