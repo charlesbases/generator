@@ -32,7 +32,7 @@ type generatedFile struct {
 
 	buf *bytes.Buffer
 
-	externalPackages map[string]*externalPackage
+	externalPackages map[string]*Package
 	usedPackageNames map[string]struct{}
 }
 
@@ -49,12 +49,12 @@ func run(fn func(p *Plugin)) error {
 }
 
 // NewFile .
-func (p *Plugin) NewFile(name string, path string, exts ...*externalPackage) *generatedFile {
+func (p *Plugin) NewFile(name string, path string, exts ...*Package) *generatedFile {
 	f := &generatedFile{
 		filename:         name,
 		packagepath:      abs(path),
 		buf:              new(bytes.Buffer),
-		externalPackages: make(map[string]*externalPackage),
+		externalPackages: make(map[string]*Package),
 		usedPackageNames: make(map[string]struct{}),
 	}
 	p.files = append(p.files, f)
@@ -67,7 +67,7 @@ func (p *Plugin) NewFile(name string, path string, exts ...*externalPackage) *ge
 }
 
 // Import .
-func (f *generatedFile) Import(exts ...*externalPackage) {
+func (f *generatedFile) Import(exts ...*Package) {
 	f.imports(exts...)
 }
 
@@ -78,12 +78,12 @@ func (f *generatedFile) Writer(v ...any) {
 }
 
 // imports .
-func (f *generatedFile) imports(exts ...*externalPackage) {
+func (f *generatedFile) imports(exts ...*Package) {
 	for _, ext := range exts {
 		ext.standard = IsStandard(ext.path)
 
 		if ext.alias == "" {
-			ext.alias = filepath.Base(ext.path)
+			ext.alias = trim(filepath.Base(ext.path))
 		}
 
 		if _, found := f.externalPackages[ext.path]; !found {
@@ -128,7 +128,7 @@ func (f *generatedFile) content() ([]byte, error) {
 		return nil, fmt.Errorf("%s: unparsable Go source: %v\n%s", f.filename, err, src.String())
 	}
 
-	var imports = make([]*externalPackage, 0, len(f.externalPackages))
+	var imports = make([]*Package, 0, len(f.externalPackages))
 	for _, externalPackage := range f.externalPackages {
 		imports = append(imports, externalPackage)
 	}

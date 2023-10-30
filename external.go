@@ -1,10 +1,8 @@
 package generator
 
-import "path/filepath"
-
-// externalPackage is the import path of a Go package.
+// Package is the import path of a Go package.
 // for example: "google.golang.org/protobuf/compiler/protogen"
-type externalPackage struct {
+type Package struct {
 	// path 包路径
 	path string
 	// alias 别名
@@ -13,13 +11,15 @@ type externalPackage struct {
 	standard bool
 }
 
-// ExternalPackage .
-func ExternalPackage(pkg string) *externalPackage {
-	return &externalPackage{path: pkg, alias: trim(filepath.Base(pkg)), standard: IsStandard(pkg)}
+// NewPackage .
+// 简洁包名例如: "github.com/pkg/errors", 程序可以自处理 alias
+// 复杂包名例如: "github.com/redis/go-redis/v9", "github.com/robfig/cron/v3", 需手动调用 Alias()，否则会导致生成的文件出错
+func NewPackage(pkg string) *Package {
+	return &Package{path: pkg}
 }
 
 // Alias .
-func (exp *externalPackage) Alias(alias string) *externalPackage {
+func (exp *Package) Alias(alias string) *Package {
 	exp.alias = alias
 	return exp
 }
