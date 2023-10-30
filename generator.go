@@ -73,7 +73,9 @@ func (f *generatedFile) Import(exts ...*Package) {
 
 // Writer .
 func (f *generatedFile) Writer(v ...any) {
-	fmt.Fprint(f.buf, v...)
+	if len(v) != 0 {
+		fmt.Fprint(f.buf, v...)
+	}
 	fmt.Fprintln(f.buf)
 }
 
