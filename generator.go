@@ -220,11 +220,15 @@ func (p *Plugin) format() error {
 	var args = make([]string, 0, len(p.files)+1)
 	args = append(args, "-w")
 	for _, file := range p.files {
-		args = append(args, filepath.Join(file.packagepath, file.filename))
+		if strings.HasSuffix(file.filename, ".go") {
+			args = append(args, filepath.Join(file.packagepath, file.filename))
+		}
 	}
-	// use goimports
-	if exec.Command("goimports", args...).Run() != nil {
-		return errors.New("`goimports` not found, please execute `go install golang.org/x/tools/cmd/goimports@latest` to install.")
+	if len(args) > 1 {
+		// use goimports
+		if exec.Command("goimports", args...).Run() != nil {
+			return errors.New("`goimports` not found, please execute `go install golang.org/x/tools/cmd/goimports@latest` to install.")
+		}
 	}
 	return nil
 }
