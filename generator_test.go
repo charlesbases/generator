@@ -23,10 +23,11 @@ func TestImport(t *testing.T) {
 	Run(func(p *Plugin) {
 		{
 			f := p.NewFile("import_test.go", "testing", bufio, bytes, fmt, ioutil, filepath, protogen, flag, exec, path, err1, err2)
-			f.Writer("package testing")
+			f.Println("package testing")
 
 			f.Import(NewPackage("time"))
-			f.Writer("  var _ =", "time.Now()")
+			f.Println("  var _ =", "time.Now()")
+			f.Printlnf("var _ = %s", "time.Now()")
 		}
 	})
 }
